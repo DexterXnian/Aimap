@@ -1,0 +1,18 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6485,
+                    868
+                ]
+            },
+            "properties": {
+                "name": "普陀区中心医院"
+            }
+        }
+    ]
+}

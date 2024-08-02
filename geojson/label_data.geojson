@@ -1,0 +1,109 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6758,
+                    1032
+                ]
+            },
+            "properties": {
+                "name": "曹杨三村"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6233,
+                    1144
+                ]
+            },
+            "properties": {
+                "name": "曹杨二村"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -5963,
+                    987
+                ]
+            },
+            "properties": {
+                "name": "曹杨七村"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -5337,
+                    755
+                ]
+            },
+            "properties": {
+                "name": "中关村公寓"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6355,
+                    160
+                ]
+            },
+            "properties": {
+                "name": "曹杨四村"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6142,
+                    53
+                ]
+            },
+            "properties": {
+                "name": "曹杨五村"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -5860,
+                    894
+                ]
+            },
+            "properties": {
+                "name": "曹杨新村街道"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -5514,
+                    540
+                ]
+            },
+            "properties": {
+                "name": "曹杨六村"
+            }
+        }
+    ]
+}

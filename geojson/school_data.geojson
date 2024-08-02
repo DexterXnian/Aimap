@@ -1,0 +1,96 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6759,
+                    700
+                ]
+            },
+            "properties": {
+                "name": "曹杨第二中学"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6169,
+                    855
+                ]
+            },
+            "properties": {
+                "name": "朝春中心小学"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6688,
+                    240
+                ]
+            },
+            "properties": {
+                "name": "曹杨二中附属学校（分部）"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6295,
+                    247
+                ]
+            },
+            "properties": {
+                "name": "曹杨二中附属学校"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -5849,
+                    449
+                ]
+            },
+            "properties": {
+                "name": "兴陇中学"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -5663,
+                    510
+                ]
+            },
+            "properties": {
+                "name": "沙田学校"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -6078,
+                    247
+                ]
+            },
+            "properties": {
+                "name": "曹杨新村第六小学"
+            }
+        }
+    ]
+}
