@@ -33,7 +33,8 @@ class AImapping:
             # print(flag)
 
         # color = self.get_color(self.description, len(self.polygons_dict)+len(self.lines_dict))
-        self.get_color_ai(self.description, len(self.polygons_dict)+len(self.lines_dict))
+        self.get_color_ai()
+
         # self.mapping(map_name=self.map_name, colors=color, poly=self.polygons_dict, line=self.lines_dict, point=self.points_dict)
         # print(self.get_color(self.description, len(self.polygons_dict)+len(self.lines_dict)))
        
@@ -96,8 +97,15 @@ class AImapping:
             plt.title('Extracted Color Palette')
             # Convert sorted colors to hex
             sorted_colors_hex = [mcolors.rgb2hex(color / 255.0) for color in sorted_colors]
-
+        
         else:
+            print("非图像文件，无法提取颜色")
+            sorted_colors_hex = []
+
+        return sorted_colors_hex
+
+    def get_color_ai(self):
+        try:
             #星火认知大模型Spark Max的URL值，其他版本大模型URL值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
             SPARKAI_URL = 'wss://spark-api.xf-yun.com/v3.5/chat'
             #星火认知大模型调用秘钥信息，请前往讯飞开放平台控制台（https://console.xfyun.cn/services/bm35）查看
@@ -115,23 +123,45 @@ class AImapping:
                 spark_llm_domain=SPARKAI_DOMAIN,
                 streaming=False,
             )
+            
+
+            if len(self.polygons_dict) + len(self.lines_dict) == 0:
+                raise ValueError("GeoPackage 文件中没有图层。")
+            else:
+                layer_names = ", ".join(list(self.polygons_dict.keys()) + list(self.lines_dict.keys())).replace("_曹杨新村街道.shp", " ").replace(".shp", "")
+                message_content = f'我要做党建风格的地图，请给我{len(self.polygons_dict) + len(self.lines_dict)}个hex颜色的党建风格的颜色，分别给{layer_names}，用逗号分隔'
+
+
             messages = [ChatMessage(
                 role="user",
-                content=f'我要做{description}风格的地图, 请给我{n_colors}个hex颜色, 按重要性排列, 用逗号分隔'
+                content=message_content
             )]
             handler = ChunkPrintHandler()
             a = spark.generate([messages], callbacks=[handler])
             print(a.generations[0][0].text)
-            sorted_colors_hex = re.findall(r'#[0-9A-Fa-f]{6}', a.generations[0][0].text)
+             # 使用正则表达式提取颜色代码和对应的图层名称
+            pattern = r"(\d+\.\s\S+\s-\s.*?)(#[A-Fa-f0-9]{6})"
+            matches = re.findall(pattern, a.generations[0][0].text)
 
-            # Convert message to sorted colors
-            
-        return sorted_colors_hex
-    
-    def get_color_ai(self, description, n_colors): 
-        # shapefile_dict = self.load_shapefiles()
-        print(self.shapefiles_path)
-            
+            color_dict = {}
+
+            # 遍历匹配结果并填充字典
+            for match in matches:
+                layer_info, hex_color = match
+                layer_name = layer_info.split(' - ')[0].split('. ')[1]
+                color_dict[layer_name] = hex_color
+
+            # 打印结果
+            for layer, color in color_dict.items():
+                print(f'{layer}: {color}')
+
+            return color_dict
+
+        except Exception as e:
+            print(e)
+            return {}
+        
+
     
     def mapping(self,map_name,colors,poly=None,line=None,point=None):
         # Plot the color palette

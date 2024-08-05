@@ -33,6 +33,8 @@ if __name__ == '__main__':
         return fiona.listlayers(gpkg_path)
 
     def combine_gpkg_files(input_folder, output_gpkg):
+        # 找到基准crs
+        basicCrs = gpd.read_file(r"D:\4\demo\ai地图\shp\曹杨新村街道.shp").crs
         # 遍历输入文件夹中的所有 gpkg 文件
         for file_name in os.listdir(input_folder):
             if file_name.endswith('.gpkg'):
@@ -43,11 +45,11 @@ if __name__ == '__main__':
                 for layer in layers:
                     gdf = gpd.read_file(file_path, layer=layer)
                     # 将图层写入输出的 gpkg 文件中
-                    gdf.to_file(output_gpkg, layer=layer, driver="GPKG")
+                    gdf.to_file(output_gpkg, layer=layer, driver="GPKG", encoding='utf-8', crs=basicCrs)
                     print(f"Layer {layer} from {file_name} added to {output_gpkg}")
 
     # 示例调用
     input_folder = r"D:\4\demo\ai地图\gpkg"
-    output_gpkg = r"D:\4\demo\ai地图\gpkg\combined.gpkg"
+    output_gpkg = r"D:\4\demo\ai地图\gpkg\all_test.gpkg"
 
     combine_gpkg_files(input_folder, output_gpkg)
