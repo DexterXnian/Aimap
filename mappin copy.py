@@ -33,8 +33,9 @@ class AImapping:
             # print(flag)
 
         # color = self.get_color(self.description, len(self.polygons_dict)+len(self.lines_dict))
-        self.get_color_ai()
-
+        color_dict = self.get_color_ai()
+        print(color_dict)
+        self.ai_mapping(color_dict=color_dict, poly=self.polygons_dict, line=self.lines_dict, point=self.points_dict)
         # self.mapping(map_name=self.map_name, colors=color, poly=self.polygons_dict, line=self.lines_dict, point=self.points_dict)
         # print(self.get_color(self.description, len(self.polygons_dict)+len(self.lines_dict)))
        
@@ -129,7 +130,7 @@ class AImapping:
                 raise ValueError("GeoPackage 文件中没有图层。")
             else:
                 layer_names = ", ".join(list(self.polygons_dict.keys()) + list(self.lines_dict.keys())).replace("_曹杨新村街道.shp", " ").replace(".shp", "")
-                message_content = f'我要做党建风格的地图，请给我{len(self.polygons_dict) + len(self.lines_dict)}个hex颜色的党建风格的颜色，分别给{layer_names}，用逗号分隔'
+                message_content = f'我要做党建风格的地图，请直接给我{len(self.polygons_dict) + len(self.lines_dict)}个hex颜色的党建风格的颜色，分别给{layer_names}。'
 
 
             messages = [ChatMessage(
@@ -139,21 +140,19 @@ class AImapping:
             handler = ChunkPrintHandler()
             a = spark.generate([messages], callbacks=[handler])
             print(a.generations[0][0].text)
-             # 使用正则表达式提取颜色代码和对应的图层名称
-            pattern = r"(\d+\.\s\S+\s-\s.*?)(#[A-Fa-f0-9]{6})"
-            matches = re.findall(pattern, a.generations[0][0].text)
-
             color_dict = {}
+
+            # 使用正则表达式提取颜色代码和对应的图层名称
+            pattern = r"\d+\.\s*([\u4e00-\u9fa5a-zA-Z0-9]+)[：:：\s-]+\s*#([A-Fa-f0-9]{6})"
+            matches = re.findall(pattern, a.generations[0][0].text)
 
             # 遍历匹配结果并填充字典
             for match in matches:
-                layer_info, hex_color = match
-                layer_name = layer_info.split(' - ')[0].split('. ')[1]
-                color_dict[layer_name] = hex_color
+                layer_name, hex_color = match
+                color_dict[layer_name] = f'#{hex_color}'
 
-            # 打印结果
-            for layer, color in color_dict.items():
-                print(f'{layer}: {color}')
+            if color_dict == {}:
+                raise ValueError("没有提取到颜色信息。")
 
             return color_dict
 
@@ -161,8 +160,85 @@ class AImapping:
             print(e)
             return {}
         
+    def ai_mapping(self,color_dict,poly=None,line=None,point=None):
+        fig, ax = plt.subplots(1, 1, figsize=(15, 10))
+        legend_handles = []
 
-    
+        if poly is not None:
+            sorted_poly = sorted(poly.items(), key=lambda item: item[1]['area'], reverse=True)
+            
+            for i, (key, value) in enumerate(sorted_poly):
+                base_layer_name_match = re.match(r"([^\d.]+)", key.replace("_曹杨新村街道", ""))
+                if base_layer_name_match:
+                    base_layer_name = base_layer_name_match.group(1)
+                else:
+                    base_layer_name = key
+
+
+                if '曹杨新村街道.shp' == key:
+                    alpha = 0.75
+                else: 
+                    alpha = 1
+                gdf = value['data']
+                color = color_dict[base_layer_name]  # 按排序顺序分配颜色
+                legend_label = key.replace('_曹杨新村街道', '').replace('.shp', '')  # 删除 "_曹杨新村街道" 和 ".shp"
+                gdf.plot(ax=ax, color=color, edgecolor='none', linewidth=0.5, alpha=alpha, label=legend_label)
+                legend_handles.append(Polygon([[0, 0], [1, 1], [1, 0]], closed=True, edgecolor='black', facecolor=color, alpha=alpha, linewidth=0.5, label=legend_label,))
+        
+        if line is not None:
+            # print(enumerate(line))
+            for i, (key, value) in enumerate(line.items()):
+                gdf = value['data']
+                
+                base_layer_name_match = re.match(r"([^\d.]+)", key.replace("_曹杨新村街道", ""))
+                if base_layer_name_match:
+                    base_layer_name = base_layer_name_match.group(1)
+                else:
+                    base_layer_name = key
+                color = color_dict[base_layer_name]
+
+                # 设置样式宽度
+                if '河流' in key:
+                    linewidth = 4.0
+                elif '道路' in key:
+                    linewidth = 2
+                else:
+                    linewidth = 0.5
+                legend_label = key.replace('_曹杨新村街道', '').replace('.shp', '')  # 删除 "_曹杨新村街道" 和 ".shp"
+                gdf.plot(ax=ax, color=color, edgecolor='none', linewidth=linewidth, label=legend_label)
+                legend_handles.append(Line2D([0], [0], marker='_', color=color, label=legend_label, linewidth=linewidth, markerfacecolor=color))
+
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_edgecolor('black')
+            spine.set_linewidth(2)
+
+        # 隐藏所有坐标轴的文字和刻度
+        ax.xaxis.set_ticks([])  # 这行代码将 x 轴的所有刻度设置为空，因此不会显示任何刻度线。
+        ax.yaxis.set_ticks([])  # 这行代码将 y 轴的所有刻度设置为空，因此不会显示任何刻度线。
+        ax.xaxis.set_tick_params(labelbottom=False)  # 这行代码禁用了 x 轴下方的刻度标签，因此不会显示任何标签文字。
+        ax.yaxis.set_tick_params(labelleft=False)  # 这行代码禁用了 y 轴左侧的刻度标签，因此不会显示任何标签文字。
+
+
+        plt.rcParams['font.sans-serif']=['SimHei']    # 用来正常显示中文
+        plt.rcParams['axes.unicode_minus']=False   # 用来正常显示负号
+        
+        plt.title(self.map_name, fontsize=24)
+
+        # 显示图例
+        legend = plt.legend(handles=legend_handles, loc='lower right', title='图例')
+        legend.get_title().set_fontsize('x-large') 
+                
+        # 设置图例框的背景色
+        frame = legend.get_frame() 
+        frame.set_edgecolor('black')  # 设置图例框背景色
+        frame.set_linewidth(1)
+
+        # 绘制每个 Shapefile
+        plt.show()
+
+
+
     def mapping(self,map_name,colors,poly=None,line=None,point=None):
         # Plot the color palette
         fig, ax = plt.subplots(1, 1, figsize=(15, 10))
